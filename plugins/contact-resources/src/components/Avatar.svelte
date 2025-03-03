@@ -16,7 +16,7 @@
 <script lang="ts">
   import { AvatarProvider, getAvatarProviderId, Person } from '@hcengineering/contact'
   import { Asset, getResource } from '@hcengineering/platform'
-  import { getBlobURL, reduceCalls, sizeToWidth } from '@hcengineering/presentation'
+  import { getBlobURL, reduceCalls, sizeToWidth, getClient } from '@hcengineering/presentation'
   import {
     AnySvelteComponent,
     ColorDefinition,
@@ -73,7 +73,8 @@
       srcSet = undefined
     } else if (avatar != null) {
       const avatarProviderId = getAvatarProviderId(avatar.avatarType)
-      avatarProvider = avatarProviderId !== undefined ? await getAvatarProvider(avatarProviderId) : undefined
+      const client = getClient()
+      avatarProvider = avatarProviderId !== undefined ? await getAvatarProvider(client, avatarProviderId) : undefined
 
       if (avatarProvider === undefined) {
         url = undefined

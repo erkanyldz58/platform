@@ -52,11 +52,13 @@ import {
   type Workspace
 } from '@hcengineering/server-core'
 import { type Token } from '@hcengineering/server-token'
-import { FindMessagesGroupsParams, FindMessagesParams } from '@hcengineering/communication-types'
+import { FindMessagesGroupsParams, FindMessagesParams, Message } from '@hcengineering/communication-types'
 import {
   RequestEvent as CommunicationEvent,
-  ConnectionInfo as CommunicationCtx
+  ConnectionInfo as CommunicationCtx,
+  EventResult
 } from '@hcengineering/communication-sdk-types'
+import { MessagesGroup } from '@hcengineering/communication-types/types/message'
 
 const useReserveContext = (process.env.USE_RESERVE_CTX ?? 'true') === 'true'
 
@@ -347,21 +349,33 @@ export class ClientSession implements Session {
     await ctx.sendResponse(ctx.requestId, {})
   }
 
-  async event (ctx: ClientSessionCtx, event: CommunicationEvent): Promise<void> {
+  async eventRaw (ctx: ClientSessionCtx, event: CommunicationEvent): Promise<EventResult> {
     this.lastRequest = Date.now()
-    const result = await ctx.communicationApi.event(this.getCommunicationCtx(), event)
+    return await ctx.communicationApi.event(this.getCommunicationCtx(), event)
+  }
+
+  async event (ctx: ClientSessionCtx, event: CommunicationEvent): Promise<void> {
+    const result = await this.eventRaw(ctx, event)
     await ctx.sendResponse(ctx.requestId, result)
+  }
+
+  async findMessagesRaw (ctx: ClientSessionCtx, params: FindMessagesParams, queryId?: number): Promise<Message[]> {
+    this.lastRequest = Date.now()
+    return await ctx.communicationApi.findMessages(this.getCommunicationCtx(), params, queryId)
   }
 
   async findMessages (ctx: ClientSessionCtx, params: FindMessagesParams, queryId?: number): Promise<void> {
-    this.lastRequest = Date.now()
-    const result = await ctx.communicationApi.findMessages(this.getCommunicationCtx(), params, queryId)
+    const result = await this.findMessagesRaw(ctx, params, queryId)
     await ctx.sendResponse(ctx.requestId, result)
   }
 
-  async findMessagesGroups (ctx: ClientSessionCtx, params: FindMessagesGroupsParams): Promise<void> {
+  async findMessagesGroupsRaw (ctx: ClientSessionCtx, params: FindMessagesGroupsParams): Promise<MessagesGroup[]> {
     this.lastRequest = Date.now()
-    const result = await ctx.communicationApi.findMessagesGroups(this.getCommunicationCtx(), params)
+    return await ctx.communicationApi.findMessagesGroups(this.getCommunicationCtx(), params)
+  }
+
+  async findMessagesGroups (ctx: ClientSessionCtx, params: FindMessagesGroupsParams): Promise<void> {
+    const result = await this.findMessagesGroupsRaw(ctx, params)
     await ctx.sendResponse(ctx.requestId, result)
   }
 
