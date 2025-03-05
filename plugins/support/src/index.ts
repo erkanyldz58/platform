@@ -21,10 +21,10 @@ import { SupportClientFactory, SupportConversation, SupportSystem } from './type
 export * from './types'
 export { deleteSupportConversation, updateSupportConversation } from './utils'
 
-export const supportLink = 'https://huly.link/slack'
-export const reportBugLink = 'https://github.com/hcengineering/platform/issues/new'
-export const docsLink = 'http://docs.huly.io/'
-export const privacyPolicyLink = 'https://v1.huly.io/legal/privacy/'
+export const supportLink = 'https://www.kubik.com.tr'
+export const reportBugLink = 'mailto:dxdiagyldz@gmail.com?subject=Hata Bildirimi&body=Lütfen sorunu açıklayın:'; // eslint-disable-line
+export const docsLink = 'https://www.kubik.com.tr'
+export const privacyPolicyLink = 'https://www.kubik.com.tr'
 
 /**
  * @public
