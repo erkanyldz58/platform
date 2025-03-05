@@ -363,7 +363,7 @@ export async function configurePlatform() {
   console.log('loading configuration', config)
   console.log('loaded branding', myBranding)
 
-  const title = myBranding.title ?? 'Platform'
+  const title = myBranding.title ?? 'Kubik'
 
   // apply branding
   window.document.title = title

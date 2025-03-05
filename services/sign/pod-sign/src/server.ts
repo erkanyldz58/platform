@@ -90,7 +90,7 @@ export function createServer (storageConfig: StorageConfiguration, brandings: Br
 
       const originalFile = await storageAdapter.read(measureCtx, wsIds, fileId)
       const ctx = {
-        title: branding?.title ?? 'Huly'
+        title: branding?.title ?? 'Kubik'
       }
       const signRes = await signPDF(Buffer.concat(originalFile), config.Cert, config.CertPwd, ctx)
 

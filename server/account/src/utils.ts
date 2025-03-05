@@ -650,7 +650,7 @@ export async function createWorkspaceRecord (
   region: string = '',
   initMode: WorkspaceMode = 'pending-creation'
 ): Promise<CreateWorkspaceRecordResult> {
-  const brandingKey = branding?.key ?? 'huly'
+  const brandingKey = branding?.key ?? 'Kubik'
   const regionInfo = getRegions().find((it) => it.region === region)
 
   if (regionInfo === undefined) {

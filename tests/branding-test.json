@@ -1,10 +1,10 @@
 {
   "localhost:8083": {
     "key": "huly",
-    "title": "Platform",
+    "title": "Kubik",
     "protocol": "http",
     "languages": "en,ru,pt,es,zh,fr",
-    "defaultLanguage": "en",
+    "defaultLanguage": "es",
     "defaultApplication": "tracker",
     "defaultSpace": "tracker:project:DefaultProject",
     "defaultSpecial": "issues",
