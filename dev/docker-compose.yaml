@@ -93,7 +93,7 @@ services:
       # - WS_LIVENESS_DAYS=1
       - ACCOUNTS_URL=http://huly.local:3000
       - BRANDING_PATH=/var/cfg/branding.json
-      # - DISABLE_SIGNUP=true
+      - DISABLE_SIGNUP=true
     restart: unless-stopped
   stats:
     image: hardcoreeng/stats
@@ -209,7 +209,7 @@ services:
       - DESKTOP_UPDATES_URL=https://dist.huly.io
       - DESKTOP_UPDATES_CHANNEL=dev
       - BRANDING_URL=http://huly.local:8087/branding.json
-      # - DISABLE_SIGNUP=true
+      - DISABLE_SIGNUP=true
     restart: unless-stopped
   transactor:
     image: hardcoreeng/transactor
