@@ -1,38 +1,38 @@
 {
-  "huly.local:8080": {
+  "159.146.90.231:8080": {
     "key": "huly-dev",
     "title": "Kubik",
     "protocol": "http",
     "language": "es",
     "lastNameFirst": "true"
   },
-  "huly.local:8087": {
+  "159.146.90.231:8087": {
     "key": "huly",
     "title": "Kubik",
     "protocol": "http",
     "language": "es",
     "lastNameFirst": "true"
   },
-  "host.docker.internal:8087": {
+  "159.146.90.231:8087": {
     "key": "huly-docker",
     "title": "Kubik",
     "protocol": "http",
     "language": "es",
     "lastNameFirst": "true"
   },
-  "huly.local:8081": {
+  "159.146.90.231:8081": {
     "key": "tracex-dev",
     "title": "TraceX",
     "protocol": "http",
     "language": "es"
   },
-  "huly.local:8088": {
+  "159.146.90.231:8088": {
     "key": "tracex",
     "title": "TraceX",
     "protocol": "http",
     "language": "en"
   },
-  "host.docker.internal:8088": {
+  "159.146.90.231:8088": {
     "key": "tracex-docker",
     "title": "Kubik",
     "protocol": "http",
