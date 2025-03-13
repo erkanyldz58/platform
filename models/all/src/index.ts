@@ -113,7 +113,7 @@ import { serverFulltextId, createModel as serverFulltextModel } from '@hcenginee
 import { surveyId, createModel as surveyModel } from '@hcengineering/model-survey'
 import { presenceId, createModel as presenceModel } from '@hcengineering/model-presence'
 import { chatId, createModel as chatModel } from '@hcengineering/model-chat'
-
+import { createModel as inboxModel, inboxId } from '@hcengineering/model-inbox'
 import { type Plugin } from '@hcengineering/platform'
 
 interface ConfigurablePlugin extends Omit<Data<PluginConfiguration>, 'pluginId' | 'transactions'> {}
@@ -447,17 +447,8 @@ export default function buildModel (enabled: string[] = ['*'], disabled: string[
       }
     ],
     [mailModel, mailId],
-    [
-      chatModel,
-      chatId,
-      {
-        label: products.string.ConfigLabel,
-        description: products.string.ConfigDescription,
-        enabled: false,
-        beta: false,
-        classFilter: defaultFilter
-      }
-    ],
+    [chatModel, chatId],
+    [inboxModel, inboxId],
 
     [serverCoreModel, serverCoreId],
     [serverAttachmentModel, serverAttachmentId],

@@ -1328,7 +1328,7 @@ export async function findPerson (
   db: AccountDB,
   branding: Branding | null,
   token: string,
-  params: { socialString: string }
+  params: { socialString: string, requireAccount?: boolean }
 ): Promise<PersonUuid | undefined> {
   const { socialString } = params
   decodeTokenVerbose(ctx, token)
@@ -1337,6 +1337,12 @@ export async function findPerson (
 
   if (socialId == null) {
     return
+  }
+
+  if (params.requireAccount === true) {
+    const account = await db.account.findOne({ uuid: socialId.personUuid })
+
+    return account?.uuid
   }
 
   return socialId.personUuid

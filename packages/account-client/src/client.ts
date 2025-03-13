@@ -80,7 +80,7 @@ export interface AccountClient {
   updateWorkspaceRole: (account: string, role: AccountRole) => Promise<void>
   updateWorkspaceName: (name: string) => Promise<void>
   deleteWorkspace: () => Promise<void>
-  findPerson: (socialString: PersonId) => Promise<PersonUuid | undefined>
+  findPerson: (socialString: PersonId, requireAccount?: boolean) => Promise<PersonUuid | undefined>
 
   // Service methods
   workerHandshake: (region: string, version: Data<Version>, operation: WorkspaceOperation) => Promise<void>
@@ -530,10 +530,10 @@ class AccountClientImpl implements AccountClient {
     await this.rpc(request)
   }
 
-  async findPerson (socialString: string): Promise<PersonUuid | undefined> {
+  async findPerson (socialString: string, requireAccount?: boolean): Promise<PersonUuid | undefined> {
     const request = {
       method: 'findPerson' as const,
-      params: { socialString }
+      params: { socialString, requireAccount }
     }
 
     return await this.rpc(request)

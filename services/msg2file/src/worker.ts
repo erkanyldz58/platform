@@ -31,10 +31,11 @@ import { v4 as uuid } from 'uuid'
 import { RequestEventType } from '@hcengineering/communication-sdk-types'
 import { retry } from '@hcengineering/communication-shared'
 import { StorageAdapter } from '@hcengineering/server-core'
+import { deserializeMessage } from '@hcengineering/communication-yaml'
 
 import { PostgresDB, SyncRecord } from './db'
 import config from './config'
-import { parseFileStream, toFileMessage } from './parser'
+import { parseFileStream } from './parser'
 import { applyPatches } from './utils'
 import { connectPlatform } from './platform'
 
@@ -85,7 +86,7 @@ async function processRecord (
   storage: StorageAdapter
 ): Promise<void> {
   try {
-    await msg2file(ctx, record.workspace, record.card, storage)
+    await msg2file(ctx, record.workspace, record.card, storage, db)
     await db.removeRecord(record.workspace, record.card)
   } catch (e) {
     ctx.error('Failed to process record', { workspace: record.workspace, card: record.card, err: e })
@@ -101,11 +102,11 @@ async function msg2file (
   ctx: MeasureContext,
   workspace: WorkspaceID,
   cardId: CardID,
-  storage: StorageAdapter
+  storage: StorageAdapter,
+  db: PostgresDB
 ): Promise<void> {
   const client = await connectPlatform(workspace)
-  // TODO: FIXME
-  const card = await client.findOne<Card>(cardPlugin.class.Card, { _id: cardId as any })
+  const card = await client.findOne<Card>(cardPlugin.class.Card, { _id: cardId as Ref<Card> })
 
   if (card === undefined) {
     ctx.error('Card not found, skip processing', { workspace, card: cardId })
@@ -113,7 +114,7 @@ async function msg2file (
   }
 
   await applyPatchesToGroups(ctx, client, workspace, card, storage)
-  await newMessages2file(ctx, client, workspace, card, storage)
+  await newMessages2file(ctx, client, workspace, card, storage, db)
 }
 
 async function applyPatchesToGroups (
@@ -173,8 +174,6 @@ async function applyPatchesToGroup (
       blob,
       parsedFile.metadata.fromDate,
       parsedFile.metadata.toDate,
-      group.fromId,
-      group.toId,
       updatedMessages.length
     )
   } catch (error) {
@@ -187,12 +186,13 @@ async function newMessages2file (
   client: RestClient,
   workspace: WorkspaceID,
   card: Card,
-  storage: StorageAdapter
+  storage: StorageAdapter,
+  db: PostgresDB
 ): Promise<void> {
   while (true) {
     const messages = (
       await client.findMessages({ card: card._id, order: SortingOrder.Ascending, limit: config.MessagesPerFile })
-    ).map(toFileMessage)
+    ).map(deserializeMessage)
 
     if (messages.length === 0) {
       break
@@ -211,10 +211,11 @@ async function newMessages2file (
     }
 
     const blob = await uploadFile(ctx, storage, workspace, metadata, messages)
-    await createGroup(client, card._id, blob, fromDate, toDate, firstMessage.id, lastMessage.id, messages.length)
+    await createGroup(client, card._id, blob, fromDate, toDate, messages.length)
 
-    await removeMessages(client, card._id, firstMessage.id, lastMessage.id)
-    await removePatches(client, card._id, firstMessage.id, lastMessage.id)
+    const ids = messages.map((it) => it.id)
+    await removeMessages(db, workspace, card._id, ids)
+    await removePatches(db, workspace, card._id, ids)
   }
 }
 
@@ -224,8 +225,6 @@ async function createGroup (
   blobId: Ref<Blob>,
   fromDate: Date,
   toDate: Date,
-  fromId: MessageID,
-  toId: MessageID,
   count: number
 ): Promise<void> {
   await retry(
@@ -237,8 +236,6 @@ async function createGroup (
           blobId,
           fromDate,
           toDate,
-          fromId,
-          toId,
           count
         }
       }),
@@ -258,28 +255,20 @@ async function removeGroup (client: RestClient, card: CardID, blobId: Ref<Blob>)
   )
 }
 
-async function removeMessages (client: RestClient, card: CardID, fromId: MessageID, toId: MessageID): Promise<void> {
+async function removeMessages (db: PostgresDB, workspace: WorkspaceID, card: CardID, ids: MessageID[]): Promise<void> {
   await retry(
-    async () =>
-      await client.event({
-        type: RequestEventType.RemoveMessages,
-        card,
-        fromId,
-        toId
-      }),
+    async () => {
+      await db.removeMessages(workspace, card, ids)
+    },
     { retries: 3 }
   )
 }
 
-async function removePatches (client: RestClient, card: Ref<Card>, fromId: MessageID, toId: MessageID): Promise<void> {
+async function removePatches (db: PostgresDB, workspace: WorkspaceID, card: Ref<Card>, ids: MessageID[]): Promise<void> {
   await retry(
-    async () =>
-      await client.event({
-        type: RequestEventType.RemovePatches,
-        card,
-        fromId,
-        toId
-      }),
+    async () => {
+      await db.removePatches(workspace, card, ids)
+    },
     { retries: 3 }
   )
 }

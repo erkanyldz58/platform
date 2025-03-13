@@ -25,7 +25,10 @@ import {
   type Notification,
   type NotificationContext,
   type RichText,
-  type SocialID
+  type SocialID,
+  MessageType,
+  type ContextID,
+  type AccountID
 } from '@hcengineering/communication-types'
 import {
   type CreateAttachmentEvent,
@@ -33,14 +36,15 @@ import {
   type CreateMessageResult,
   type CreatePatchEvent,
   type CreateReactionEvent,
+  type CreateThreadEvent,
   type EventResult,
   type RemoveAttachmentEvent,
-  type RemoveMessageEvent,
+  type RemoveMessagesEvent,
   type RemoveReactionEvent,
   type RequestEvent,
   RequestEventType,
   type ResponseEvent,
-  type CreateThreadEvent
+  type UpdateNotificationContextEvent
 } from '@hcengineering/communication-sdk-types'
 import {
   type Client as PlatformClient,
@@ -48,15 +52,17 @@ import {
   getCurrentAccount,
   SocialIdType
 } from '@hcengineering/core'
+import { onDestroy } from 'svelte'
 import {
   createMessagesQuery,
   createNotificationsQuery,
-  initLiveQueries
+  initLiveQueries,
+  createNotificationContextsQuery
 } from '@hcengineering/communication-client-query'
 
 import { getCurrentWorkspaceUuid, getFilesUrl } from './file'
 
-export { createMessagesQuery, createNotificationsQuery }
+export { createMessagesQuery, createNotificationsQuery, createNotificationContextsQuery }
 
 interface Connection extends PlatformConnection {
   findMessages: (params: FindMessagesParams, queryId?: number) => Promise<Message[]>
@@ -81,12 +87,10 @@ export async function setCommunicationClient (platformClient: PlatformClient): P
     return
   }
   client = new Client(connection as unknown as Connection)
-  initLiveQueries(client, getCurrentWorkspaceUuid(), getFilesUrl())
+  initLiveQueries(client, getCurrentWorkspaceUuid(), getFilesUrl(), onDestroy)
 }
 
 class Client {
-  onEvent: (event: ResponseEvent) => void = () => {}
-
   constructor (private readonly connection: Connection) {
     connection.pushHandler((...events: any[]) => {
       for (const event of events) {
@@ -97,11 +101,7 @@ class Client {
     })
   }
 
-  private getSocialId (): SocialID {
-    const id = getCurrentAccount().socialIds.find((it) => it.startsWith(SocialIdType.HULY))
-    if (id == null) throw new Error('Huly social id not found')
-    return id
-  }
+  onEvent: (event: ResponseEvent) => void = () => {}
 
   async createThread (card: CardID, message: MessageID, thread: CardID): Promise<void> {
     const event: CreateThreadEvent = {
@@ -117,6 +117,7 @@ class Client {
   async createMessage (card: CardID, content: RichText): Promise<MessageID> {
     const event: CreateMessageEvent = {
       type: RequestEventType.CreateMessage,
+      messageType: MessageType.Message,
       card,
       content,
       creator: this.getSocialId()
@@ -126,10 +127,10 @@ class Client {
   }
 
   async removeMessage (card: CardID, message: MessageID): Promise<void> {
-    const event: RemoveMessageEvent = {
-      type: RequestEventType.RemoveMessage,
+    const event: RemoveMessagesEvent = {
+      type: RequestEventType.RemoveMessages,
       card,
-      message
+      messages: [message]
     }
     await this.connection.sendEvent(event)
   }
@@ -189,6 +190,16 @@ class Client {
     await this.connection.sendEvent(event)
   }
 
+  async updateNotificationContext (context: ContextID, lastView?: Date): Promise<void> {
+    const event: UpdateNotificationContextEvent = {
+      type: RequestEventType.UpdateNotificationContext,
+      context,
+      account: this.getAccount(),
+      lastView
+    }
+    await this.connection.sendEvent(event)
+  }
+
   async findMessages (params: FindMessagesParams, queryId?: number): Promise<Message[]> {
     return await this.connection.findMessages(params, queryId)
   }
@@ -214,5 +225,15 @@ class Client {
 
   close (): void {
     // do nothing
+  }
+
+  private getSocialId (): SocialID {
+    const id = getCurrentAccount().socialIds.find((it) => it.startsWith(SocialIdType.HULY))
+    if (id == null) throw new Error('Huly social id not found')
+    return id
+  }
+
+  private getAccount (): AccountID {
+    return getCurrentAccount().uuid
   }
 }
