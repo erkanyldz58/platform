@@ -28,17 +28,18 @@ import {
   type SocialID,
   MessageType,
   type ContextID,
-  type AccountID
+  type AccountID,
+  type BlobID
 } from '@hcengineering/communication-types'
 import {
-  type CreateAttachmentEvent,
+  type CreateFileEvent,
   type CreateMessageEvent,
   type CreateMessageResult,
   type CreatePatchEvent,
   type CreateReactionEvent,
   type CreateThreadEvent,
   type EventResult,
-  type RemoveAttachmentEvent,
+  type RemoveFileEvent,
   type RemoveMessagesEvent,
   type RemoveReactionEvent,
   type RequestEvent,
@@ -169,23 +170,31 @@ class Client {
     await this.connection.sendEvent(event)
   }
 
-  async createAttachment (card: CardID, message: MessageID, attachment: CardID): Promise<void> {
-    const event: CreateAttachmentEvent = {
-      type: RequestEventType.CreateAttachment,
+  async createFile (
+    card: CardID,
+    message: MessageID,
+    blobId: BlobID,
+    fileType: string,
+    filename: string
+  ): Promise<void> {
+    const event: CreateFileEvent = {
+      type: RequestEventType.CreateFile,
       card,
       message,
-      attachment,
+      blobId,
+      fileType,
+      filename,
       creator: this.getSocialId()
     }
     await this.connection.sendEvent(event)
   }
 
-  async removeAttachment (card: CardID, message: MessageID, attachment: CardID): Promise<void> {
-    const event: RemoveAttachmentEvent = {
-      type: RequestEventType.RemoveAttachment,
+  async removeFile (card: CardID, message: MessageID, blobId: BlobID): Promise<void> {
+    const event: RemoveFileEvent = {
+      type: RequestEventType.RemoveFile,
       card,
       message,
-      attachment
+      blobId
     }
     await this.connection.sendEvent(event)
   }
