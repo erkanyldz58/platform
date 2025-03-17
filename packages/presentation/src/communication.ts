@@ -194,7 +194,8 @@ class Client {
       type: RequestEventType.RemoveFile,
       card,
       message,
-      blobId
+      blobId,
+      creator: this.getSocialId()
     }
     await this.connection.sendEvent(event)
   }
