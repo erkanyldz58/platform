@@ -43,6 +43,7 @@ import onboard, { onboardId } from '@hcengineering/onboard'
 import { mySpaceId } from '@hcengineering/my-space'
 import presence, { presenceId } from '@hcengineering/presence'
 import print, { printId } from '@hcengineering/print'
+import { processId } from '@hcengineering/process'
 import { productsId } from '@hcengineering/products'
 import { questionsId } from '@hcengineering/questions'
 import { recruitId } from '@hcengineering/recruit'
@@ -98,6 +99,7 @@ import '@hcengineering/notification-assets'
 import '@hcengineering/my-space-assets'
 import '@hcengineering/preference-assets'
 import '@hcengineering/print-assets'
+import '@hcengineering/process-assets'
 import '@hcengineering/products-assets'
 import '@hcengineering/questions-assets'
 import '@hcengineering/recruit-assets'
@@ -350,6 +352,7 @@ function configureI18n(): void {
   addStringsLoader(mailId, async (lang: string) => await import(`@hcengineering/mail-assets/lang/${lang}.json`))
   addStringsLoader(chatId, async (lang: string) => await import(`@hcengineering/chat-assets/lang/${lang}.json`))
   addStringsLoader(inboxId, async (lang: string) => await import(`@hcengineering/inbox-assets/lang/${lang}.json`))
+  addStringsLoader(processId, async (lang: string) => await import(`@hcengineering/process-assets/lang/${lang}.json`))
 }
 
 export async function configurePlatform() {
@@ -546,6 +549,7 @@ export async function configurePlatform() {
   addLocation(mailId, () => import(/* webpackChunkName: "card" */ '@hcengineering/mail-resources'))
   addLocation(chatId, () => import(/* webpackChunkName: "chat" */ '@hcengineering/chat-resources'))
   addLocation(inboxId, () => import(/* webpackChunkName: "inbox" */ '@hcengineering/inbox-resources'))
+  addLocation(processId, () => import(/* webpackChunkName: "process" */ '@hcengineering/process-resources'))
 
   setMetadata(client.metadata.FilterModel, 'ui')
   setMetadata(client.metadata.ExtraPlugins, ['preference' as Plugin])
