@@ -55,7 +55,7 @@
     </div>
   {:else}
     {#key $location.path[1]}
-      {#await connect(getMetadata(workbenchRes.metadata.PlatformTitle) ?? 'Platform')}
+      {#await connect(getMetadata(workbenchRes.metadata.PlatformTitle) ?? 'Kubik')}
         <Loading>
           {#if ($workspaceCreating ?? -1) >= 0}
             <div class="ml-1">

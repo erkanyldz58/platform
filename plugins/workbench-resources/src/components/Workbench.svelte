@@ -312,7 +312,7 @@
     if (docTitle !== undefined && docTitle !== '') {
       document.title = ws == null ? docTitle : `${docTitle} - ${ws}`
     } else {
-      const title = getMetadata(workbench.metadata.PlatformTitle) ?? 'Platform'
+      const title = getMetadata(workbench.metadata.PlatformTitle) ?? 'Kubik'
       document.title = ws == null ? title : `${ws} - ${title}`
     }
     void broadcastEvent(workbench.event.NotifyTitle, document.title)
